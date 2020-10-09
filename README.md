@@ -4,11 +4,7 @@ This project aims to create an interactive dashboard/application which displays 
 
 ## Getting Started
 To collect the financial news data, we will be using [Google News API from RapidAPI](https://rapidapi.com/newscatcher-api-newscatcher-api-default/api/google-news/).
-Please register and save your API key for the next few steps.
-
-
-### Installation
-
+Register and get your API key ready for the following steps.
 
 ### Project Directory Structure
 ```
@@ -42,7 +38,7 @@ also to terminate program once there are no more available news)
 $ python GnewsAPI_amazon.py
 ```
 
-(Note: To be edited, output files to be stored in `/data` folder, edit code to allow easy manipulation of parameters such as time frame)
+(Note: To be edited, output files to be stored in `news_data/` folder, edit code to allow easy manipulation of parameters such as time frame)
 As the Google News API has a query limit of 5 requests per hour, the code has been adjusted to work around that limitation.
 As of now, we have collected weekly news titles for 2020 for Amazon, Apple and Netflix, with the start of week on Mondays.
 
@@ -60,16 +56,28 @@ For this model, the workflow should be like this:
 
 ### Installation
 Install the dependencies by creating the Conda environment `finbert` from the given `environment.yml` file and activating it.
+(Note: To double check for any other dependencies that should be listed out)
+
+
 ```
+conda install -c pytorch pytorch
+pip install pytorch-pretrained-bert
+conda install nltk
 conda env create -f environment.yml
 conda activate finbert
+```
+
+Start your python terminal in command prompt by entering `python` or `python3` and run the following code:
+```
+import nltk
+nltk.download('punkt')
 ```
 
 ### Getting Predictions
 Given a .csv file, `predict.py` produces a .csv file including the sentences in the text, corresponding softmax probabilities for three labels, actual prediction and sentiment score (which is calculated with: probability of positive - probability of negative).
 
 ```
-python predict.py --text_path COMPANYNAME_titles.csv --output_dir output/ --model_path models/classifier_model/finbert-sentiment
+python predict.py --text_path news_data/COMPANYNAME_titles.csv --output_dir score_data/ --model_path models/classifier_model/finbert-sentiment
 ```
 
 ## Web Application with Visualisations

@@ -36,7 +36,7 @@ with open(output_path, 'w') as f:
 f.close()
 
 
-with open(args.text_path,'r') as f:
+with open(args.text_path,'r', encoding="utf-8") as f:
     reader = csv.reader(f)
     next(reader, None)  # skip the header
     for row in reader:
