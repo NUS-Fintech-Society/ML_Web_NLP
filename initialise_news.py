@@ -24,6 +24,7 @@ def preprocess_text(text):
     """Removing source and punctuations from title"""
 
     text = " ".join(text.split("-")[:-1]) # Remove source of article
+    text = re.sub(' +', ' ', text) # Remove additional whitespace
 
     return text
 
