@@ -104,5 +104,7 @@ def get_scores(data):
     
     data['scores'] = lst_scores
         
-        
+ if __name__ == "__main__":
+    data = pd.read_csv("test.csv") # encoding='unicode_escape' to prevent encoding/ decoding errors
+    get_scores(data)       
         
