@@ -1,83 +1,29 @@
-# Sentiment Analysis of Companies using Financial News 
+# Sentiment Analysis of Companies using News Titles
 
-This project aims to create an interactive dashboard/application which displays Sentiment Analysis scores of Companies using the most recent financial news.
+This project aims to create an interactive dashboard which displays Sentiment Analysis scores of Companies using the most recent news. This repository contains the steps to obtain data and sentiment scores, the web application codes can be accessed on the [DevOps_Fintech_Website](https://github.com/NUS-Fintech-Society/DevOps_Fintech_Website) and [DevOps_Fintech_Website_Backend](https://github.com/NUS-Fintech-Society/DevOps_Fintech_Website_Backend) repository.
 
-## Getting Started
-To collect the financial news data, we will be using [Google News API from RapidAPI](https://rapidapi.com/newscatcher-api-newscatcher-api-default/api/google-news/).
-Register and get your API key ready for the following steps.
-
-### Project Directory Structure
+## Project Directory Structure
 ```
-├── models
-│   ├── classifier_model
-│   │   ├── finbert-sentiment
-│   │   │   ├── config.json
-│   │   │   ├── pytorch_model.bin
-│   │   │   ├── pytorch_model.bin.cpgz
-├── news_data
-│   ├── amazon_titles.json
-│   ├── amazon_titles.csv
-│   ├── ...
-├── score_data
-│   ├── amazon_score.csv
-│   ├── ...
-├── GnewsAPI_amazon.py
+├── data
+│   ├── initialise_news XXXX-XX-XX
+├── initialise_news.py
 ├── predict.py
-├── environment.yml
 .   .
 .   .
 ```
 
 ## Data Collection of Financial News
-To collect the financial news using Google News API, insert your API key into the `GnewsAPI_amazon.py` file and run.
+Currently, data is populated for [Top 30 companies on NASDAQ Index](https://disfold.com/top-companies-us-nasdaq/) (as of 2020) for the time period 2020 Jan to 2021 Feb. The companies are saved in `companies.txt` and are used for news querying on [Google News API on RapidAPI](https://rapidapi.com/newscatcher-api-newscatcher-api-default/api/google-news/).
 
-(Note: To scale up and make this process more modular so that we can run the code for multiple companies at once, 
-also to terminate program once there are no more available news)
+As the Google News API has a query limit of 3 requests per hour, code has been adjusted to work around that limitation and loop around multiple API keys to fetch news in a more efficient manner. Data shall be fetched and stored into csv, then subsequently processed for prediction score and populated into the SQLite3 database used for the Fintech Society website.
 
-```
-$ python GnewsAPI_amazon.py
-```
+### Adding New Companies
+To add in new companies, run `python initialise_news.py`. Data obtained will be stored in a csv file.
 
-(Note: To be edited, output files to be stored in `news_data/` folder, edit code to allow easy manipulation of parameters such as time frame)
-As the Google News API has a query limit of 5 requests per hour, the code has been adjusted to work around that limitation.
-As of now, we have collected weekly news titles for 2020 for Amazon, Apple and Netflix, with the start of week on Mondays.
-
-## Applying FinBERT Sentiment Analysis Model
-We will be using [FinBERT](https://github.com/ProsusAI/finBERT) to transform news titles into sentiment scores. 
-
-### Downloading Pre-trained Model
-Retraining of the FinBERT model is possible if needed. However for our case, we are using the pretrained sentiment 
-analysis model trained on Financial PhraseBank data which can be downloaded from
-[here](https://prosus-public.s3-eu-west-1.amazonaws.com/finbert/finbert-sentiment/pytorch_model.bin).
-
-For this model, the workflow should be like this:
-* Download the model and put it into the directory `models/classifier_model/finbert-sentiment/`.
-* Call the model with `.from_pretrained(<model directory name>)`
-
-### Installation
-Install the dependencies by creating the Conda environment `finbert` from the given `environment.yml` file and activating it.
-(Note: To double check for any other dependencies that should be listed out)
+### Adding New Time Period
+To add in news for new time period, run `python update_news.py`.
 
 
-```
-conda install -c pytorch pytorch
-pip install pytorch-pretrained-bert
-conda install nltk
-conda env create -f environment.yml
-conda activate finbert
-```
-
-Start your python terminal in command prompt by entering `python` or `python3` and run the following code:
-```
-import nltk
-nltk.download('punkt')
-```
-
-### Getting Predictions
-Given a .csv file, `predict.py` produces a .csv file including the sentences in the text, corresponding softmax probabilities for three labels, actual prediction and sentiment score (which is calculated with: probability of positive - probability of negative).
-
-```
-python predict.py --text_path news_data/COMPANYNAME_titles.csv --output_dir score_data/ --model_path models/classifier_model/finbert-sentiment
-```
-
-## Web Application with Visualisations
+Note: run predict and updating to database to be updated
+## Getting Predictions
+Given a .csv file, `predict.py` produces a .csv file including the sentences in the text.
