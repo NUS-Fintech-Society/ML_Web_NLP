@@ -17,17 +17,31 @@ def print_banner(text, length=70):
     print("<"*length)
 
 def print_line(text, length=70):
-    side_length = max(int((50-len(text))/2), 0)
+    side_length = int((50-len(text))/2)
     print("="*side_length + text + "="*side_length)
 
 def preprocess_text(text):
     """Removing source and punctuations from title"""
 
     text = " ".join(text.split("-")[:-1]) # Remove source of article
-    text = text.translate(str.maketrans('', '', string.punctuation)) # Remove punctuation in title
-    text = text.strip() + "." # Adding fullstop to title
 
     return text
+
+def get_extract_end_date(extract_start_date, end_date):
+    """Get extract end date based on standardisation rules"""
+
+    # To query in the same ISO week only
+    if extract_start_date.weekday() == 6: # 6 refers to Sunday index
+        extract_end_date = extract_start_date + timedelta(days=7) # End of week
+    else:
+        days_to_sunday = timedelta((6 - extract_start_date.weekday()) % 7)
+        extract_end_date = extract_start_date + days_to_sunday # End of week
+    
+    # Ensure extract end date does not exceed end date
+    if extract_end_date > end_date:
+        extract_end_date = end_date
+    
+    return extract_end_date
 
 def extract_news(company):
     """Extract News from Google News API"""
@@ -46,16 +60,7 @@ def extract_news(company):
             'x-rapidapi-key': api_keys[api_key_index]
             }
 
-        # To query in the same ISO week only
-        if extract_start_date.weekday() == 6: # 6 refers to Sunday index
-            extract_end_date = extract_start_date + timedelta(days=7) # End of week
-        else:
-            days_to_sunday = timedelta((6 - extract_start_date.weekday()) % 7)
-            extract_end_date = extract_start_date + days_to_sunday # End of week
-        
-        # Ensure extract end date does not exceed end date
-        if extract_end_date > end_date:
-            extract_end_date = end_date
+        extract_end_date = get_extract_end_date(extract_start_date, end_date)
 
         # Make api call
         query_string = {"country":"US", "lang":"en", "q":company, 
@@ -87,7 +92,7 @@ def extract_news(company):
             writer = csv.writer(f)
 
             for article in response_text['articles']:
-                title = preprocess_text(article["title"]) #.encode('utf-8')
+                title = preprocess_text(article["title"]).encode('utf-8').decode('utf-8')
                 date = datetime.strptime(article["published"], '%a, %d %b %Y %H:%M:%S %Z')
                 date_posted = date.strftime('%Y-%m-%d')
                 year = date.isocalendar()[0] # Extracting year
